@@ -4,10 +4,11 @@ import java.util.List;
 
 import ec.edu.ups.sd64.evarest.business.GestionGenerales;
 import ec.edu.ups.sd64.evarest.model.General;
-//import config.ConfigJaeger;
-//import io.opentracing.Span;
-//import io.opentracing.Tracer;
-//import io.opentracing.util.GlobalTracer;
+import io.opentracing.Tracer;
+import config.ConfigJaeger;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -24,19 +25,19 @@ import jakarta.ws.rs.core.Response;
 @Path("datos")
 public class GeneralesService {
 	
-	//private final Tracer tracer = GlobalTracer.get();
+	private final Tracer tracer = GlobalTracer.get();
 
     @Inject
     private GestionGenerales gGenerales;
     
-    //@Inject
-    //private ConfigJaeger configjaeger;
+    @Inject
+    private ConfigJaeger configjaeger;
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response crear(General gen) {
-        // Span spanGuardarLibro = tracer.buildSpan("Crear Elemento").start();
+        Span spanGuardar = tracer.buildSpan("Crear Elemento").start();
         try {
             if (gen == null) {
                 ErrorMessage error = new ErrorMessage(98, "Entidad General es nula");
@@ -56,7 +57,7 @@ public class GeneralesService {
                     .entity(error)
                     .build();
         } finally {
-            // spanGuardarLibro.finish();
+        	spanGuardar.finish();
         }
     }
 
@@ -64,7 +65,7 @@ public class GeneralesService {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response actualizar(General gen) {
-    	//Span spanActualizarLibro = tracer.buildSpan("Actualizar Elemento").start();
+    	Span spanActualizarElemento = tracer.buildSpan("Actualizar Elemento").start();
         try {
         	gGenerales.actualizarGeneral(gen);
         	System.out.print("--Elemento Actualizado--");
@@ -75,14 +76,14 @@ public class GeneralesService {
                     .entity(error)
                     .build();
         }finally {
-        	//spanActualizarLibro.finish();
+        	spanActualizarElemento.finish();
         }
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     public String borrar(@QueryParam("codigo") int codigo) {
-    	//Span spanEliminarLibro = tracer.buildSpan("Eliminar Elemento").start();
+    	Span spanEliminarElemento = tracer.buildSpan("Eliminar Elemento").start();
         try {
         	gGenerales.borrarElemento(codigo);
         	System.out.print("--Elemento Eliminado: "+codigo+"--");
@@ -90,7 +91,7 @@ public class GeneralesService {
         } catch (Exception e) {
             return "Error";
         }finally {
-        	//spanEliminarLibro.finish();
+        	spanEliminarElemento.finish();
         }
     }
 
@@ -99,7 +100,7 @@ public class GeneralesService {
     @Path("{extra}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response leerPorSerial(@PathParam("extra") String serial) {
-    	//Span spanGetLibroPorSerial= tracer.buildSpan("Obtener Elementos mediante la Informacion").start();
+    	Span spanGetElementoPorCaracteristica= tracer.buildSpan("Obtener Elementos mediante la Informacion").start();
         try {
         	General uni = gGenerales.getElementoPorExtra(serial);
         	System.out.print("--Elemento Obtenido--");
@@ -110,7 +111,7 @@ public class GeneralesService {
                     .entity(error)
                     .build();
         }finally {
-        	//spanGetLibroPorSerial.finish();
+        	spanGetElementoPorCaracteristica.finish();
         }
     }
 
@@ -118,7 +119,7 @@ public class GeneralesService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("list")
     public Response getLibros() {
-    	//Span spanGetLibros = tracer.buildSpan("Obtener Elementos ").start();
+    	Span spanGetElemento = tracer.buildSpan("Obtener Elementos ").start();
     	try {
     		List<General> uni = gGenerales.getGenerales();
     		if (uni.size() > 0) {
@@ -135,7 +136,7 @@ public class GeneralesService {
 	                .entity(error)
 	                .build();
     	}finally {
-    		//spanGetLibros.finish();
+    		spanGetElemento.finish();
         }
     	
     }
